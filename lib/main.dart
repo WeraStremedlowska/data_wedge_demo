@@ -8,10 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'flutter_datawedge.dart';
+import 'package:sunmi_barcode_scanner/sunmi_barcode_scanner.dart';
 
 void main() {
   runZonedGuarded(
-        () async {
+    () async {
       final binding = WidgetsFlutterBinding.ensureInitialized();
 
       await SystemChrome.setPreferredOrientations(
@@ -23,7 +24,7 @@ void main() {
       };
       _showApp(binding, const MyApp());
     },
-        (error, stackTrace) {
+    (error, stackTrace) {
       log(error.toString());
     },
   );
@@ -31,8 +32,10 @@ void main() {
 
 void _showApp(WidgetsBinding binding, Widget screen) {
   binding
-  // ignore: invalid_use_of_protected_member
-    ..scheduleAttachRootWidget(binding.wrapWithDefaultView(screen),)
+    // ignore: invalid_use_of_protected_member
+    ..scheduleAttachRootWidget(
+      binding.wrapWithDefaultView(screen),
+    )
     ..scheduleForcedFrame();
 }
 
@@ -60,11 +63,40 @@ class _HomeScreenState extends State<HomeScreen> {
   FlutterDataWedge fdw = FlutterDataWedge();
   Future<void>? initScannerResult;
   late StreamSubscription onScanSubscription;
+  String _modelVersion = 'Unknown';
+  String _data = '';
+  var sunmiBarcodeScanner = SunmiBarcodeScanner();
 
   @override
   void initState() {
     super.initState();
+    initPlatformState();
     initScannerResult = initScanner();
+    sunmiBarcodeScanner.onBarcodeScanned().listen((event) {
+      setState(() {
+        _data = event;
+      });
+    });
+  }
+
+  Future<void> initPlatformState() async {
+    String modelVersion;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      modelVersion = (await sunmiBarcodeScanner.getScannerModel()).toString();
+      print(modelVersion);
+    } on PlatformException {
+      modelVersion = 'Failed to get model version.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _modelVersion = modelVersion;
+    });
   }
 
   Future<void> initScanner() async {
@@ -118,7 +150,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               body: TabBarView(
                 children: [
-                  ButtonTabView(fdw: fdw),
+                  ButtonTabView(
+                    fdw: fdw,
+                    scannedResult: _data,
+                  ),
                   LogTabView(fdw),
                 ],
               ),

@@ -16,6 +16,7 @@ dependencies:
   strict_json: 2.2.1
   freezed_result: 1.0.3+1
   uuid: 4.3.3
+  sunmi_barcode_scanner: 0.0.4
 
   cupertino_icons: ^1.0.2
 

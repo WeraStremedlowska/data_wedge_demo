@@ -4,9 +4,11 @@ import '../flutter_datawedge.dart';
 
 class ButtonTabView extends StatefulWidget {
   final FlutterDataWedge fdw;
+  final String scannedResult;
 
   const ButtonTabView({
     required this.fdw,
+    required this.scannedResult,
     Key? key,
   }) : super(key: key);
 
@@ -24,11 +26,17 @@ class _ButtonTabViewState extends State<ButtonTabView> {
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       children: [
+        TextField(
+          controller: _textController,
+          decoration: const InputDecoration(
+            labelText: 'Scan result',
+          ),
+        ),
         Expanded(
-          child: TextField(
-            controller: _textController,
-            decoration: const InputDecoration(
-              labelText: 'Scan result',
+          child: Center(
+            child: Text(
+              widget.scannedResult,
+              style: const TextStyle(fontSize: 20),
             ),
           ),
         ),
